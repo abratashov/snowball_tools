@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'yaml'
 
 $lang = 'uk'
@@ -7,9 +9,9 @@ $all_tests = []
 $errors = {}
 
 def incorrect_stem_msg(result_stem, word, stem)
-  "Word:      #{word}\n" +
-  "should be: #{stem}\n" +
-  "but it is: #{result_stem}\n"
+  "Word:      #{word}\n" \
+    "should be: #{stem}\n" \
+    "but it is: #{result_stem}\n"
 end
 
 [
@@ -24,13 +26,13 @@ end
   [IO.read('./algorithms/ukrainian/tests/08_derivational.txt').split, '08_derivational'],
   [IO.read('./algorithms/ukrainian/tests/09_tidy_up.txt').split, '09_tidy_up'],
   [IO.read('./algorithms/ukrainian/tests/10_other.txt').split, '10_other'],
-  [IO.read('./algorithms/ukrainian/tests/12_approve.txt').split, '03_test_victory'],
+  [IO.read('./algorithms/ukrainian/tests/12_approve.txt').split, '03_test_victory']
 ].each do |test_words, set_name|
   test_words.each do |test_word|
     stem, ending = test_word.to_s.split('|')
-    word =[stem, ending&.delete('.')].join('')
+    word = [stem, ending&.delete('.')].join('')
     $all_tests << word
-    result_stem = (`echo "#{word}" | #{$snowball_cmd}`).strip
+    result_stem = `echo "#{word}" | #{$snowball_cmd}`.strip
     $errors[set_name] ||= []
     $errors[set_name] << incorrect_stem_msg(result_stem, word, stem) if result_stem != stem
   end
@@ -40,9 +42,9 @@ end
   [YAML.load_file('./algorithms/ukrainian/tests/11_replacement.yml'), '11_exceptions']
 ].each do |words_set, set_name|
   words_set.each do |word, test_case|
-    stem, ending = test_case.to_s.split('|')
+    stem, = test_case.to_s.split('|')
     $all_tests << word
-    result_stem = (`echo "#{word}" | #{$snowball_cmd}`).strip
+    result_stem = `echo "#{word}" | #{$snowball_cmd}`.strip
     $errors[set_name] ||= []
     $errors[set_name] << incorrect_stem_msg(result_stem, word, stem) if result_stem != stem
   end
