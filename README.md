@@ -68,6 +68,31 @@ This complex command translates `utf` script to `sbl` and build it in the `snowb
   ) //...
 ```
 
+Also it is possible to show `utf` version (but in less readable format) by this command:
+
+```sh
+./snowball -utf8 algorithms/russian.sbl -o tmp -syntax
+
+#=>
+
+define step7
+  (
+    [
+    substring
+    ]
+    among
+      literal 'εστερ'
+      literal 'εστατ'
+      literal 'οτερ'
+      literal 'οτατ'
+      literal 'υτερ'
+      literal 'υτατ'
+      literal 'ωτερ'
+      literal 'ωτατ'
+      (
+        delete
+```
+
 ### Runing local tests
 
 For checking the correctness of the stemmer you can add some language tests, for ex.:
