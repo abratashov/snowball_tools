@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+max_word_size = (ARGV[0] || 5).to_i
+limit = (ARGV[1] || 10000).to_i
+exact = ARGV[2] || 'no'
+words = IO.read('/home/alex/projects/abratashov/snowball-data/ukrainian/voc.txt').split
+stems = IO.read('/home/alex/projects/abratashov/snowball-data/ukrainian/output.txt').split
+
+res = words.zip(stems)
+           .select do |word, stem|
+             if exact == 'exact'
+               word.size == max_word_size
+             else
+               word.size <= max_word_size
+             end
+           end[0..limit]
+
+# r = h.keys.sort.select{|stem| stem.size == 4}.map{|stem| [stem, h[stem]].join(";") }
+
+def stem_format(word, stem)
+  ending = word[stem.size..-1]
+  ending.size > 0 ? "#{stem}|#{ending}" : stem
+end
+
+File.open("/home/alex/Desktop/words_test.txt", "w") { |f| f.write res.map{|word, stem| stem_format(word, stem)}.join("\n") }
+# File.open("/home/alex/Desktop/words_test.txt", "w") { |f| f.write res.map{|word, stem| [word, stem].join(" ")}.join("\n") }

@@ -53,15 +53,21 @@ routines (
   prelude
   mark_regions R2
   min_len
-  short_word
+  short_word_4l
+  short_word_5l
   long_word
   perfective_gerund
   reflexive
+  long_endings
   adjective
   adjectival
   verb
   noun
   remove_last_letter
+  remove_last_2_letters
+  remove_last_2_vowels
+  remove_vowel_before_vowel
+  remove_last_vowel
   derivational
   tidy_up
 )
@@ -134,22 +140,43 @@ backwardmode (
     )
   )
 
+  define long_endings as (
+    [substring] among (
+      // nouns
+      'ість' 'істю' 'істи' 'істе' 'істського'
+      'енами'
+      'очки' 'очці' 'очку' 'очкою' 'очка'
+      'очко' 'очок' 'очкам' 'очками' 'очках'
+      'ості' 'ости' 'осте' 'остей' 'остям' 'остями' 'остях'
+      'ником' 'никові' 'нику' 'ників' 'ника' 'никам' 'никами' 'никах' 'ники' // need to remove ?
+      // 'ніком' 'нікові' 'ніку' 'ніків' 'ніка' 'нікам' 'ніками' 'ніках' 'ніки' // need to remove ?
+      'ців' 'цями'
+      'ків'
+
+      // female gender
+      'кою' 'кам' 'ками' 'ках'
+      'ською' 'ська' 'ську' 'сько'
+        (delete)
+    )
+  )
+
   define adjective as (
     [substring] among (
       'ий' 'ого' 'ому' 'им' 'ім'                 // зел|ен.ий
-      'іший' 'ішого' 'ішому' 'ішим' 'ішім' 'іше'
+      'іший' 'ішого' 'ішому' 'ішим' 'ішім' 'іше' 'іш'
       'ої' 'ій' 'ою'
       'іша' 'ішої' 'ішій' 'ішу' 'ішою'
       'их' 'ими'
+      'ний' 'на' 'не' 'ним' 'нім' 'ної' 'ну' 'ною' 'ній'  'них' 'ні' 'ник' 'но' 'ного' 'ними' 'ному'
       'іші' 'іших' 'ішими'
       'ього' 'ьому'
       'ьої' 'ьою'
       'іх' 'іми'
-      'ова' 'ове'
+      'ова' 'ове' 'во'
       'їй' 'иїй'
       'йому' 'ийому'
       'єє' 'еє'
-      'ена' 'ені' 'ене' 'ену'
+      'ен' 'ена' 'ені' 'ене' 'ену' 'енам' 'ени' 'енів' 'еном'
       'яча' 'яче' 'ячу' 'ячі'
       'ача' 'аче' 'ачу' 'ачі'
       'юча' 'юче' 'ючу' 'ючі'
@@ -163,7 +190,13 @@ backwardmode (
 
     try (
       [substring] among (
-        'ен' 'яч' 'ач' 'юч' 'уч' (delete) // зел|ен.ий
+        'ен' // зел|ен.ий
+        'ов' // абетк|ов.ого
+        'яч'
+        'ач'
+        'юч'
+        'уч'
+        (delete)
       )
     )
   )
@@ -171,22 +204,25 @@ backwardmode (
   define verb as (
     [substring] among (
       'ав' 'али' 'ало' 'ала' 'ать' 'ати' // пізнав|ав
-      'ме'
       'іть'
-      'йте'
-      'ла' 'ло' 'ли'
-      'ти' 'ть' 'те'
+      'йте' 'ймо'
+      'ме'
+      'ла' 'ло' 'ли' 'лу'
+      'но'
+      //'ти' 'ть' 'те' // need to remove ?
       'єш' 'ємо' 'єте' 'ють'
       'еш' 'емо' 'ете' 'уть'
-      'лю' 'иш' 'ить' 'имо' 'ите' 'лять'
+      'лю' 'иш' 'ить' 'имо' 'ите' 'лять' 'ши'
       'ляти'
       'їш' 'їть' 'їмо' 'їте' 'ять' 'яти'
         (delete)
     )
   )
+
   define noun as (
     [substring] among (
       'ам' 'ами' 'ах' // вод|ам
+      'ар' 'арем' 'аря'
       'ею'
       'ям' 'ями' 'ях'
       'ові' 'ом'
@@ -196,9 +232,10 @@ backwardmode (
       'ію' 'ії'
       'ів'
       'ев' 'ов' 'ей' 'иям' 'иях' 'ию'
-      'іям' 'іях'
-      'ия' 'єю' 'еві' 'єм' 'їв'
+      'іям' 'іях' 'ія'
+      'ия' 'єю' 'еві' 'єм' 'еїв' 'їв'
       'ією' 'иєю' 'еєю'
+      'ка' 'ки' 'ці' 'ку' 'ко' 'ок' // female gender
       'ьї' 'ьє' 'ьєю' 'ью' 'ья'
         (delete)
     )
@@ -206,31 +243,83 @@ backwardmode (
 
   define remove_last_letter as (
     [substring] among (
-      'а' 'в' 'е' 'є' 'и' 'і' // NOUN: вод|а, VERB: вчи|в
+      'а' 'в' 'е' 'є' 'и' 'і' 'ї' // NOUN: вод|а, VERB: вчи|в
       'й' 'о' 'у' 'ь' 'ю' 'я'
         (delete)
     )
   )
 
-  // HERE!!!!
+  define remove_last_2_letters as ( // 2-letters from the all previous sets
+    [substring] among (
+      'ав' 'ам' 'ар' 'ах' 'ач'
+      'ев' 'еє' 'ей' 'ем' 'ен' 'еш' 'ею'
+      'єє' 'єм' 'єш' 'єю'
+      'ий' 'им' 'их' 'иш' 'ию' 'ия'
+      'ів' 'їв' 'ії' 'ій' 'їй' 'ім' 'іх' 'ію'
+      'їш'
+      'ла' 'ли' 'ло' 'лю' // аку|лі ?
+      'ме' // дія|ми ?
+      'ов' 'ої' 'ой' 'ом' 'ою' 'сь' 'ся'
+       //'ти' 'те' 'ть' // need to remove ?
+      'уч'
+      'ьє' 'ьї' 'ью' 'ья'
+      'юч'
+      'ям' 'ях' 'яч'
+        (delete)
+    )
+  )
+
+  define remove_last_vowel as (
+    [substring] among (
+      'а' 'е' 'є' 'и' 'і' 'ї'
+      'й' 'о' 'у' 'ь' 'ю' 'я'
+        (delete)
+    )
+  )
+
+  define remove_last_2_vowels as (
+    remove_vowel_before_vowel
+      and remove_last_vowel
+  )
+
+  define remove_vowel_before_vowel as (
+    [substring] among (
+      'а' 'е' 'є' 'и' 'і' 'ї' 'й' 'о' 'у' 'ь' 'ю' 'я'
+      ('а' or 'е' or 'є' or 'и' or 'і' or 'ї' or 'й' or 'о' or 'у' or 'ь' or 'ю' or 'я' delete )
+    )
+  )
+
   define derivational as (
     [substring] R2 among (
       'іст' // незалежн|іст.тю
       'ост'
-      'еньк'
+      'ень' 'еньк'
+      'ськ'
+      'ізм'
         (delete)
     )
   )
 
   define tidy_up as (
     [substring] among (
+      'б' ('б' delete) // хоб|б.і
+      'в' ('в' delete)
+      'г' ('г' delete)
       'д' ('д' delete) // усевлад|д.ям
       'ж' ('ж' delete)
+      'з' ('з' delete)
+      'к' ('к' delete)
       'л' ('л' delete)
+      'м' ('м' delete)
       'н' ('н' delete)
+      'п' ('п' delete)
+      'р' ('р' delete)
       'с' ('с' delete)
       'т' ('т' delete)
+      'ф' ('ф' delete)
+      'ц' ('ц' delete)
       'ч' ('ч' delete)
+      'ш' ('ш' delete)
     )
   )
 
@@ -238,20 +327,33 @@ backwardmode (
     $(len >= 4)
   )
 
-  define short_word as (
-    $(len == 4) and remove_last_letter
+  define short_word_4l as (
+    $(len == 4) and (remove_last_2_vowels or remove_last_vowel)
+  )
+
+  define short_word_5l as (
+    $(len == 5) and (
+      remove_last_2_vowels
+        or remove_last_vowel
+        or remove_last_2_letters
+    ) or
+      $(len == 5) and do remove_last_vowel
   )
 
   define long_word as (
-    do (
-      perfective_gerund or (
-        try reflexive
+    $(len > 5) and do (
+      do (
+        perfective_gerund or (
+          try reflexive
 
-        adjectival or verb or noun or remove_last_letter
+          long_endings or adjectival or verb or noun or remove_last_letter
+        )
       )
-    )
 
-    do derivational
+      do derivational
+      do remove_last_2_vowels
+      do remove_last_vowel
+    )
   )
 )
 
@@ -262,7 +364,7 @@ define stem as (
   backwards setlimit tomark pV for (
     min_len
 
-    short_word or long_word
+    short_word_4l or short_word_5l or long_word
 
     do tidy_up
   )

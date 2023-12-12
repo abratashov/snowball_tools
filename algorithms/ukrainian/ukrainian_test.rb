@@ -22,11 +22,11 @@ end
   [IO.read('./algorithms/ukrainian/tests/04_adjectival.txt').split, '04_adjectival'],
   [IO.read('./algorithms/ukrainian/tests/05_verb.txt').split, '05_verb'],
   [IO.read('./algorithms/ukrainian/tests/06_noun.txt').split, '06_noun'],
-  [IO.read('./algorithms/ukrainian/tests/07_remove_last_letter.txt').split, '07_remove_last_letter'],
+  [IO.read('./algorithms/ukrainian/tests/07_remove_last_letters.txt').split, '07_remove_last_letters'],
   [IO.read('./algorithms/ukrainian/tests/08_derivational.txt').split, '08_derivational'],
   [IO.read('./algorithms/ukrainian/tests/09_tidy_up.txt').split, '09_tidy_up'],
   [IO.read('./algorithms/ukrainian/tests/10_other.txt').split, '10_other'],
-  [IO.read('./algorithms/ukrainian/tests/12_approve.txt').split, '03_test_victory']
+  [IO.read('./algorithms/ukrainian/tests/12_approve.txt').split, '12_approve']
 ].each do |test_words, set_name|
   test_words.each do |test_word|
     stem, ending = test_word.to_s.split('|')

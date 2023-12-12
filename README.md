@@ -10,7 +10,7 @@ https://github.com/snowballstem/snowball/blob/master/CONTRIBUTING.rst
 
 The path to Snowball must be passed everywhere, e.g. `../snowball` if it is in the sibling directory.
 
-### utf_to_sbl
+### sbl_to_utf
 
 Script that replaces Latin chars with Unicode letters that facilitate reading the Snowball file.
 The script produces a readable `sbl` file, that allows printing it out for human reading and exploring algorithm, for ex.:
@@ -37,7 +37,7 @@ $ bin/sbl_to_utf ../snowball/algorithms/greek.sbl
   ) //...
 ```
 
-### sbl_to_utf
+### utf_to_sbl
 
 Developing a new stemmer it is convenient to write letters in UTF, like `ш` instead of transcription `{sh}` that is mandatory for `.sbl`, so to do the opposite conversion it needs to run:
 
@@ -100,4 +100,38 @@ For checking the correctness of the stemmer you can add some language tests, for
 ruby ./algorithms/ukrainian/ukrainian_test.rb ../snowball
 
 603 test(s) passed successfully!
+```
+
+
+### Daily tasks
+
+Snowball developer's routine tasks:
+
+CMD Tab 1:
+
+```sh
+cd ~/projects/abratashov/snowball_tools
+
+# Compile
+
+bin/utf_to_sbl ./algorithms/ukrainian/ukrainian.sbl.utf > ../snowball/algorithms/ukrainian.sbl && cd ../snowball && make && cd -
+```
+
+```sh
+# Run tests
+ruby ./algorithms/ukrainian/ukrainian_test.rb ../snowball
+```
+
+```sh
+# Generate stemming examples with particular words size from Snowball Data
+bin/stem_explorer 5 10000 exact
+```
+
+CMD Tab 2nd:
+
+```sh
+cd ~/projects/abratashov/snowball
+
+# Update Snowball Data
+./stemwords -l ukrainian -c UTF_8 -i ../snowball-data/ukrainian/voc.txt -o ../snowball-data/ukrainian/output.txt
 ```
