@@ -36,6 +36,12 @@ stringdef soft '{U+044C}'
 stringdef iu   '{U+044E}'
 stringdef ia   '{U+044F}'
 
+// Other Cyrillic letters from the Russian alphabet that could happen in the text
+stringdef e"   '{U+0451}'
+stringdef hard '{U+044A}'
+stringdef y`   '{U+044B}'
+stringdef e`   '{U+044D}'
+
 // Apostrophe-like symbols
 // stringdef a_apostrophe      '{U+0027}' // '
 // stringdef a_grave_accent   U+0060   // ` cannot to remove system char in Snowball
@@ -63,12 +69,13 @@ routines (
   adjectival
   verb
   noun
-  remove_last_letter
+  // remove_last_letter
   remove_last_2_letters
   remove_last_2_vowels
   remove_vowel_before_vowel
-  remove_last_vowel
+  remove_vowel
   derivational
+  remove_letter_v
   tidy_up
 )
 
@@ -78,10 +85,16 @@ integers ( pV p2 )
 
 groupings ( v )
 
-define v 'аеєиіїоуюя'
+define v 'аеєиіїоуюяь'
 
 define prelude as (
   do repeat ( goto (['ґ']) <- 'г' )
+
+  // Replace possible Cyrillic letters
+  do repeat ( goto (['ё']) <- 'е' )
+  do repeat ( goto (['ы']) <- 'и' )
+  do repeat ( goto (['э']) <- 'є' )
+  do repeat ( goto (['ъ']) delete )
 
   // Remove any apostrophe-like symbols
   do repeat ( goto (['{'}']) delete )
@@ -144,18 +157,22 @@ backwardmode (
     [substring] among (
       // nouns
       'ість' 'істю' 'істи' 'істе' 'істського'
+      'ність' 'ністю' // ?
       'енами'
       'очки' 'очці' 'очку' 'очкою' 'очка'
       'очко' 'очок' 'очкам' 'очками' 'очках'
       'ості' 'ости' 'осте' 'остей' 'остям' 'остями' 'остях'
+      'ності' 'ности' 'носте' 'ностей' 'ностям' 'ностями' 'ностях' // ?
       'ником' 'никові' 'нику' 'ників' 'ника' 'никам' 'никами' 'никах' 'ники' // need to remove ?
       // 'ніком' 'нікові' 'ніку' 'ніків' 'ніка' 'нікам' 'ніками' 'ніках' 'ніки' // need to remove ?
-      'ців' 'цями'
+      'ців' 'цями' 'цям' 'цях' 'цем' 'цеві' // ? авіанос/цям/цях/ців/цями/цем/цеві
       'ків'
+      'нні'
 
       // female gender
       'кою' 'кам' 'ками' 'ках'
       'ською' 'ська' 'ську' 'сько'
+      'очна'
         (delete)
     )
   )
@@ -163,16 +180,15 @@ backwardmode (
   define adjective as (
     [substring] among (
       'ий' 'ого' 'ому' 'им' 'ім'                 // зел|ен.ий
-      'іший' 'ішого' 'ішому' 'ішим' 'ішім' 'іше' 'іш'
+      'іший' 'ішого' 'ішому' 'ішим' 'ішім' 'іше' 'іш' 'іша' 'ішої' 'ішій' 'ішу' 'ішою' 'іші' 'іших' 'ішими'
+      'ніший' 'нішого' 'нішому' 'нішим' 'нішім' 'ніше' 'ніш' 'ніша' 'нішої' 'нішій' 'нішу' 'нішою' 'ніші' 'ніших' 'нішими'
       'ої' 'ій' 'ою'
-      'іша' 'ішої' 'ішій' 'ішу' 'ішою'
       'их' 'ими'
-      'ний' 'на' 'не' 'ним' 'нім' 'ної' 'ну' 'ною' 'ній'  'них' 'ні' 'ник' 'но' 'ного' 'ними' 'ному'
-      'іші' 'іших' 'ішими'
+      'ний' 'на' 'ни' 'не' 'ним' 'нім' 'ної' 'ну' 'ною' 'них' 'ні' 'ник' 'но' 'ного' 'ними' 'ному' // 'ній' many nouns ?
       'ього' 'ьому'
       'ьої' 'ьою'
       'іх' 'іми'
-      'ова' 'ове' 'во'
+      'ова' 'ове'
       'їй' 'иїй'
       'йому' 'ийому'
       'єє' 'еє'
@@ -182,6 +198,9 @@ backwardmode (
       'юча' 'юче' 'ючу' 'ючі'
       'уча' 'уче' 'учу' 'учі'
         (delete)
+
+      'во'
+        (v delete) // батато|во but абатство
     )
   )
 
@@ -226,7 +245,7 @@ backwardmode (
       'ею'
       'ям' 'ями' 'ях'
       'ові' 'ом'
-      'ець' 'ем'
+      'ець' 'єць' 'ем'
       'ень'
       'ой'
       'ію' 'ії'
@@ -235,17 +254,50 @@ backwardmode (
       'іям' 'іях' 'ія'
       'ия' 'єю' 'еві' 'єм' 'еїв' 'їв'
       'ією' 'иєю' 'еєю'
+      'ця' 'цю' // ? авіанос|ця  авіанос|цю
       'ка' 'ки' 'ці' 'ку' 'ко' 'ок' // female gender
       'ьї' 'ьє' 'ьєю' 'ью' 'ья'
+      'ння' 'нням' 'ннями' 'нню' 'ннях'
         (delete)
     )
   )
 
-  define remove_last_letter as (
+  define remove_last_2_vowels as (
+    remove_vowel_before_vowel
+      and remove_vowel
+  )
+
+  define remove_vowel as (
     [substring] among (
-      'а' 'в' 'е' 'є' 'и' 'і' 'ї' // NOUN: вод|а, VERB: вчи|в
+      'а' 'е' 'є' 'и' 'і' 'ї'
       'й' 'о' 'у' 'ь' 'ю' 'я'
         (delete)
+    )
+  )
+
+  define remove_vowel_before_vowel as (
+    [substring] among (
+      'а' 'е' 'є' 'и' 'і' 'ї' 'й' 'о' 'у' 'ь' 'ю' 'я'
+      ('а' or 'е' or 'є' or 'и' or 'і' or 'ї' or 'й' or 'о' or 'у' or 'ь' or 'ю' or 'я' delete )
+    )
+  )
+
+  // define remove_last_letter as (
+  //   [substring] among (
+  //     'а' 'е' 'є' 'и' 'і' 'ї'// 'в' // NOUN: вод|а, VERB: вчи|в
+  //     'й' 'о' 'у' 'ь' 'ю' 'я'
+  //       (delete)
+  //   )
+  // )
+
+  define remove_letter_v as (
+    [substring] among (
+      'в'
+        (v delete) // when any vowels before
+        // ('а' or 'е' or 'і' or 'о' or 'у' delete)
+        // ('а' or 'е' or 'и' or 'і' or 'о' or 'у' delete)
+        // ( <- 'и')
+        // (delete)
     )
   )
 
@@ -269,26 +321,6 @@ backwardmode (
     )
   )
 
-  define remove_last_vowel as (
-    [substring] among (
-      'а' 'е' 'є' 'и' 'і' 'ї'
-      'й' 'о' 'у' 'ь' 'ю' 'я'
-        (delete)
-    )
-  )
-
-  define remove_last_2_vowels as (
-    remove_vowel_before_vowel
-      and remove_last_vowel
-  )
-
-  define remove_vowel_before_vowel as (
-    [substring] among (
-      'а' 'е' 'є' 'и' 'і' 'ї' 'й' 'о' 'у' 'ь' 'ю' 'я'
-      ('а' or 'е' or 'є' or 'и' or 'і' or 'ї' or 'й' or 'о' or 'у' or 'ь' or 'ю' or 'я' delete )
-    )
-  )
-
   define derivational as (
     [substring] R2 among (
       'іст' // незалежн|іст.тю
@@ -296,6 +328,7 @@ backwardmode (
       'ень' 'еньк'
       'ськ'
       'ізм'
+      'ізац'
         (delete)
     )
   )
@@ -328,16 +361,17 @@ backwardmode (
   )
 
   define short_word_4l as (
-    $(len == 4) and (remove_last_2_vowels or remove_last_vowel)
+    $(len == 4) and (remove_last_2_vowels or remove_vowel)
   )
 
   define short_word_5l as (
     $(len == 5) and (
       remove_last_2_vowels
-        or remove_last_vowel
+        or remove_vowel
         or remove_last_2_letters
+        or remove_letter_v
     ) or
-      $(len == 5) and do remove_last_vowel
+      $(len == 5) and do remove_vowel
   )
 
   define long_word as (
@@ -346,13 +380,14 @@ backwardmode (
         perfective_gerund or (
           try reflexive
 
-          long_endings or adjectival or verb or noun or remove_last_letter
+          long_endings or adjectival or verb or noun or remove_vowel or remove_letter_v
         )
       )
 
       do derivational
+      // do remove_letter_v
       do remove_last_2_vowels
-      do remove_last_vowel
+      do remove_vowel
     )
   )
 )
